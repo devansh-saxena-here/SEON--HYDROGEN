@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SEON — Smart Energy Optimization Network</title>
+    <meta
+      name="description"
+      content="AI-powered smart energy monitoring, optimization, ESG intelligence, and reporting platform developed by Devansh Saxena."
+    />
+    <meta property="og:title" content="SEON — Smart Energy Optimization Network" />
+    <meta
+      property="og:description"
+      content="Monitor electricity consumption, uncover waste, explore ESG performance, chat with SEON AI, and export styled PDF and CSV energy reports."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/seon-favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('seon-theme');
+          var isDark = stored ? stored === 'dark' : true;
+          var root = document.documentElement;
+          if (isDark) {
+            root.classList.add('dark');
+          } else {
+            root.classList.remove('dark');
+          }
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-background text-foreground antialiased selection:bg-emerald-500/20 selection:text-emerald-500">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

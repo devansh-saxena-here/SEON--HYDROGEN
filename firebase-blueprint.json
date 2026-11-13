@@ -1,0 +1,146 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated SEON user profile with isolated PII ownership.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID matching document ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address.",
+          "minLength": 3,
+          "maxLength": 255
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "avatarUrl": {
+          "type": "string",
+          "description": "Optional avatar URL.",
+          "maxLength": 512
+        },
+        "provider": {
+          "type": "string",
+          "description": "Authentication provider name.",
+          "enum": ["password", "google.com"]
+        },
+        "role": {
+          "type": "string",
+          "description": "Display job title or operational role.",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "language": {
+          "type": "string",
+          "description": "Preferred UI language label.",
+          "enum": ["English", "Français", "Deutsch", "Español"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": ["uid", "email", "displayName", "provider", "createdAt", "updatedAt"]
+    },
+    "UserPreferences": {
+      "title": "UserPreferences",
+      "description": "User notification, appearance, and AI preference settings.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "reduceMotion": {
+          "type": "boolean",
+          "description": "Whether reduced motion is enabled."
+        },
+        "compactDensity": {
+          "type": "boolean",
+          "description": "Whether compact UI density is enabled."
+        },
+        "peakAlerts": {
+          "type": "boolean",
+          "description": "Notify on peak quota alerts."
+        },
+        "weeklyDigest": {
+          "type": "boolean",
+          "description": "Weekly Monday digest preference."
+        },
+        "esgMilestones": {
+          "type": "boolean",
+          "description": "Notify on ESG score milestones."
+        },
+        "productUpdates": {
+          "type": "boolean",
+          "description": "Product release updates preference."
+        },
+        "aiRecommendations": {
+          "type": "boolean",
+          "description": "Enable AI recommendations."
+        },
+        "autoApplyLowRisk": {
+          "type": "boolean",
+          "description": "Auto-apply low-risk AI actions under 3%."
+        },
+        "aiTone": {
+          "type": "string",
+          "description": "Preferred SEON Assistant tone.",
+          "enum": ["Professional", "Concise", "Friendly"]
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "uid",
+        "reduceMotion",
+        "compactDensity",
+        "peakAlerts",
+        "weeklyDigest",
+        "esgMilestones",
+        "productUpdates",
+        "aiRecommendations",
+        "autoApplyLowRisk",
+        "aiTone",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Private owner-only profile document storing user identity and PII."
+    },
+    "/users/{userId}/preferences/settings": {
+      "schema": {
+        "$ref": "#/entities/UserPreferences"
+      },
+      "description": "Private owner-only settings document for appearance, notifications, and AI preferences."
+    }
+  }
+}

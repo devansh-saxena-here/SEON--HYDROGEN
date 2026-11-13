@@ -1,0 +1,147 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global hardened helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'provider', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'displayName', 'avatarUrl', 'provider', 'role', 'language', 'createdAt', 'updatedAt'])
+        && data.uid is string
+        && data.uid == userId
+        && data.uid == request.auth.uid
+        && data.email is string
+        && data.email.size() >= 3
+        && data.email.size() <= 255
+        && data.displayName is string
+        && data.displayName.size() >= 1
+        && data.displayName.size() <= 80
+        && data.provider in ['password', 'google.com']
+        && (!('avatarUrl' in data) || data.avatarUrl == null || (data.avatarUrl is string && data.avatarUrl.size() <= 512))
+        && (!('role' in data) || (data.role is string && data.role.size() >= 1 && data.role.size() <= 60))
+        && (!('language' in data) || data.language in ['English', 'Français', 'Deutsch', 'Español'])
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidUserPreferences(data, userId) {
+      return data.keys().hasAll([
+          'uid',
+          'reduceMotion',
+          'compactDensity',
+          'peakAlerts',
+          'weeklyDigest',
+          'esgMilestones',
+          'productUpdates',
+          'aiRecommendations',
+          'autoApplyLowRisk',
+          'aiTone',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid',
+          'reduceMotion',
+          'compactDensity',
+          'peakAlerts',
+          'weeklyDigest',
+          'esgMilestones',
+          'productUpdates',
+          'aiRecommendations',
+          'autoApplyLowRisk',
+          'aiTone',
+          'updatedAt'
+        ])
+        && data.uid is string
+        && data.uid == userId
+        && data.uid == request.auth.uid
+        && data.reduceMotion is bool
+        && data.compactDensity is bool
+        && data.peakAlerts is bool
+        && data.weeklyDigest is bool
+        && data.esgMilestones is bool
+        && data.productUpdates is bool
+        && data.aiRecommendations is bool
+        && data.autoApplyLowRisk is bool
+        && data.aiTone in ['Professional', 'Concise', 'Friendly']
+        && data.updatedAt is timestamp;
+    }
+
+    // Owner-isolated user profiles (PII protected)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false;
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'avatarUrl', 'role', 'language', 'updatedAt']);
+      allow delete: if false;
+
+      match /preferences/{settingId} {
+        allow get: if isValidId(userId) && settingId == 'settings' && isOwner(userId);
+        allow list: if false;
+        allow create: if isValidId(userId)
+          && settingId == 'settings'
+          && isOwner(userId)
+          && isValidUserPreferences(incoming(), userId)
+          && incoming().updatedAt == request.time;
+        allow update: if isValidId(userId)
+          && settingId == 'settings'
+          && isOwner(userId)
+          && isValidUserPreferences(incoming(), userId)
+          && incoming().uid == existing().uid
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'reduceMotion',
+            'compactDensity',
+            'peakAlerts',
+            'weeklyDigest',
+            'esgMilestones',
+            'productUpdates',
+            'aiRecommendations',
+            'autoApplyLowRisk',
+            'aiTone',
+            'updatedAt'
+          ]);
+        allow delete: if false;
+      }
+    }
+
+    // Connection check document (no PII)
+    match /test/connection {
+      allow get: if true;
+      allow list, write: if false;
+    }
+  }
+}

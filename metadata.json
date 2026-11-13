@@ -1,0 +1,6 @@
+{
+  "name": "SEON — Smart Energy Optimization Network",
+  "description": "AI-powered smart energy monitoring, optimization, ESG intelligence, and reporting platform developed by Devansh Saxena.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

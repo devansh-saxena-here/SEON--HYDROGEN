@@ -8,7 +8,7 @@ import {
   validateAndNormalizeForecast,
   type ForecastHorizonDays,
   type ForecastScenario,
-} from './src/lib/forecast-logic';
+} from './src/lib/forecast-logic.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

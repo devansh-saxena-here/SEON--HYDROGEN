@@ -1,4 +1,4 @@
-import type { SevenDayTrendPoint } from './demo-data';
+import type { SevenDayTrendPoint } from './demo-data.ts';
 
 export type ForecastHorizonDays = 7 | 14;
 export type ForecastScenario = 'baseline' | 'hvac-optimized' | 'high-occupancy';
